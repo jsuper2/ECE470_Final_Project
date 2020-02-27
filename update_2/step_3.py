@@ -5,13 +5,13 @@ from numpy import cos as cos
 from numpy import sin as sin
 from copy import copy as copy
 
-center = np.array([0.13086048,-0.13086048,-0.03120471])
+center = np.array([ 0. , -0.114 , -0.2031])
 # edge = [ 0.05210302, -0.17757873 , 0.03120471]
-theta_center = np.array([0.285398163,0.785398163,1.570796340])
-radius_max = 0.11
+theta_center = np.array([0,-0.52359878,2.0943951])
+radius_max = 0.05
 
 # initialize the matrix of step coordinates
-coords = [[center for i in range(4)]for j in range(6)]
+coords = np.array([[center for i in range(4)]for j in range(6)])
 
 # helper rotation matrix function
 def rotato(i,vector):
@@ -19,6 +19,7 @@ def rotato(i,vector):
      rotm = np.array([[cos(i*phi),sin(i*phi),0],[-sin(i*phi),cos(i*phi),0],[0,0,1]])
      return np.transpose(np.matmul(rotm,np.transpose(vector)))
 
+# function to set all 3 joints in a leg
 def move_leg(thetas,leg,clientID,handles):
     vrep.simxSetJointTargetPosition(clientID, handles[leg][0], thetas[0], vrep.simx_opmode_oneshot)
     vrep.simxSetJointTargetPosition(clientID, handles[leg][1], thetas[1], vrep.simx_opmode_oneshot)
@@ -35,65 +36,51 @@ def get_theta_matrix(vel):
 
      for i in range(6):
           new_step_low = rotato(i,first_step)
+          print(new_step_low)
           new_step_high = new_step_low
           new_step_high[2] = new_step_high[2]+0.11
+          print(new_step_high)
 
           coords[i][0] = new_step_low
           coords[i][1] = new_step_high
-          coords[-(i+3)][2] = new_step_high
-          coords[-(i+3)][3] = new_step_low
+          coords[-(-i+3)][2] = new_step_high
+          coords[-(-i+3)][3] = new_step_low
 
      thetas = [[leg_IK(coords[j][i]) for i in range(4)] for j in range(6)]
      return thetas
-def step_3(pos):
-    #starting positions
-    thetas1 = leg_IK([0.13086048,-0.13086048,-0.03120471]) #0.13086048,-0.13086048,-0.03120471
-    thetas2 = copy(thetas1)
-    thetas3 = copy(thetas1)
-    thetas4 = copy(thetas1)
-    #lift up 
-    thetas2[0] = thetas1[0]
-    thetas2[1] = thetas1[1]
-    thetas2[2] = thetas1[2]+.4
-    #lift up 
-    thetas3[0] = 0
-    thetas3[1] = thetas1[1]
-    thetas3[2] = thetas1[2]+.4
-    #
-    thetas4[0] = 0
-    thetas4[1] = thetas1[1]
-    thetas4[2] = thetas1[2]
-    
-    #print(thetas1,thetas2,thetas3)
+def step_3(thetas, clientID, handles):
     #print('step')
-    move_leg(thetas2,0)
-    move_leg(thetas2,2)
-    move_leg(thetas2,4)
-    move_leg(thetas4,1)
-    move_leg(thetas4,3)
-    move_leg(thetas4,5)
-    time.sleep(.5)
-    move_leg(thetas3,0)
-    move_leg(thetas3,2)
-    move_leg(thetas3,4)
-    move_leg(thetas1,1)
-    move_leg(thetas1,3)
-    move_leg(thetas1,5)
+    # 
+    move_leg(thetas[0][1],0,clientID,handles)
+    move_leg(thetas[2][1],2,clientID,handles)
+    move_leg(thetas[4][1],4,clientID,handles)
+    move_leg(thetas[1][3],1,clientID,handles)
+    move_leg(thetas[3][3],3,clientID,handles)
+    move_leg(thetas[5][3],5,clientID,handles)
     time.sleep(.5)
 
-    move_leg(thetas4,0)
-    move_leg(thetas4,2)
-    move_leg(thetas4,4)
-    move_leg(thetas2,1)
-    move_leg(thetas2,3)
-    move_leg(thetas2,5)
+    move_leg(thetas[0][2],0,clientID,handles)
+    move_leg(thetas[2][2],2,clientID,handles)
+    move_leg(thetas[4][2],4,clientID,handles)
+    move_leg(thetas[1][0],1,clientID,handles)
+    move_leg(thetas[3][0],3,clientID,handles)
+    move_leg(thetas[5][0],5,clientID,handles)
     time.sleep(.5)
-    move_leg(thetas1,0)
-    move_leg(thetas1,2)
-    move_leg(thetas1,4)
-    move_leg(thetas3,1)
-    move_leg(thetas3,3)
-    move_leg(thetas3,5)
+
+    move_leg(thetas[0][3],0,clientID,handles)
+    move_leg(thetas[2][3],2,clientID,handles)
+    move_leg(thetas[4][3],4,clientID,handles)
+    move_leg(thetas[1][1],1,clientID,handles)
+    move_leg(thetas[3][1],3,clientID,handles)
+    move_leg(thetas[5][1],5,clientID,handles)
+    time.sleep(.5)
+
+    move_leg(thetas[0][0],0,clientID,handles)
+    move_leg(thetas[2][0],2,clientID,handles)
+    move_leg(thetas[4][0],4,clientID,handles)
+    move_leg(thetas[1][2],1,clientID,handles)
+    move_leg(thetas[3][2],3,clientID,handles)
+    move_leg(thetas[5][2],5,clientID,handles)
     time.sleep(.5)
 
 
@@ -124,4 +111,4 @@ def leg_IK(pos):
     beta = np.arccos((le*le+l3*l3-L*L)/(2*le*l3))
     gamma = np.arctan(de/we)
     theta3 = beta-gamma
-    return [theta1,-theta2,theta3]
+    return [theta1,-theta2,theta3*2]
