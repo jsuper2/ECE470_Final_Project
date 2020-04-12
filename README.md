@@ -12,4 +12,6 @@ vrep_example directory holds the example from the ECE470 lab manual and is mainl
 
 update_2_OLD is the directory with scripts to control the hexapod as well as FK and IK scripts. However these kinematic scripts were written before learning how to use screw motion and exponentials to calculate transformations
 
-update_2 is the most up to date directory containing all the files used in the most recent project update.
+update_2 is the directory with scripts to control the hexapod as well as FK and IK scripts. These kinematic scripts were written after learning how to use screw motion and exponentials to calculate transformations and therefore utalize those techniques for the forward kinematics but not inverse
+
+update_3 is the most up to date directory containing all the files used in the most recent project update. The step_3.py file now generates interpolated step paths and can handle steps in multiple directions. The hextest file shows the robot walking in a circle by rotating the step direction each step until the robot has made a full circle.
